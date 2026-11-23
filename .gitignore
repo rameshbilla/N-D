@@ -1,0 +1,36 @@
+# Dependencies
+/node_modules
+
+# Angular build output
+/dist/
+/.angular/
+
+
+*.tsbuildinfo
+
+# Env (never commit secrets)
+.env
+.env*.local
+.env.*
+.env.production
+
+# Supabase local
+/supabase/.temp
+/supabase/.branches
+
+# Testing / tooling
+/coverage
+/test-results
+__screenshots__/
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Logs / OS
+npm-debug.log*
+.DS_Store
+Thumbs.db
+!.env.example

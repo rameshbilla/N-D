@@ -1,0 +1,61 @@
+# Supabase CLI configuration (used by `supabase start` locally and as a reference for the
+# hosted project's Auth settings). Hosted projects: set the same values in the dashboard
+# under Authentication → Providers → Phone, and Authentication → Rate Limits.
+project_id = "nd-nature-healthy-food"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = false
+# Six-digit OTP valid for 5 minutes; one code per phone per 45 s at the Supabase level too.
+template = "Your N&D Nature Healthy Food code is {{ .Code }}. It expires in 5 minutes. Do not share it."
+max_frequency = "45s"
+
+# LOCAL DEVELOPMENT ONLY: a test number with a fixed code so you can try the login flow
+# without an SMS provider. This never applies to hosted/production projects.
+# [auth.sms.test_otp]
+# 919999999999 = "123456"
+
+# Choose ONE SMS provider for production (credentials via env, never committed):
+[auth.sms.twilio]
+enabled = false
+account_sid = "env(SUPABASE_AUTH_SMS_TWILIO_ACCOUNT_SID)"
+message_service_sid = "env(SUPABASE_AUTH_SMS_TWILIO_MESSAGE_SERVICE_SID)"
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
+[auth.sms.textlocal]
+enabled = false
+sender = "NDFOOD"
+api_key = "env(SUPABASE_AUTH_SMS_TEXTLOCAL_API_KEY)"
+
+[auth.rate_limit]
+# Supabase-level limits (the app adds its own per-phone / per-IP limits on top).
+sms_sent = 30
+token_verifications = 30
+
+# OTP length (6) and expiry (300 s) for phone sign-in are set in the hosted dashboard:
+# Authentication → Providers → Phone.
+
+[storage]
+enabled = true
+file_size_limit = "5MiB"
