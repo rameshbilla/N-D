@@ -1,7 +1,9 @@
 // Server-only configuration (read from environment variables at runtime).
 // Nothing in src/server/** is ever bundled into the browser.
 
-const env = (k: string) => process.env[k] ?? '';
+// Trim whitespace and stray surrounding quotes pasted into hosting dashboards.
+const env = (k: string) => (process.env[k] ?? '').trim().replace(/^(['"])(.*)\1$/, '$2').trim();
+const withHttps = (v: string) => (v && !/^https?:\/\//i.test(v) ? `https://${v}` : v);
 const int = (k: string, d: number) => {
   const n = Number.parseInt(env(k), 10);
   return Number.isFinite(n) && n > 0 ? n : d;
@@ -12,7 +14,7 @@ export const config = {
     return (env('SITE_URL') || 'http://localhost:4200').replace(/\/$/, '');
   },
   get supabaseUrl() {
-    return env('SUPABASE_URL');
+    return withHttps(env('SUPABASE_URL')).replace(/\/+$/, '');
   },
   get supabaseAnonKey() {
     return env('SUPABASE_ANON_KEY') || env('SUPABASE_PUBLISHABLE_KEY');
