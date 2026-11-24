@@ -11,7 +11,7 @@ services:
     autoDeploy: true
     buildCommand: npm ci && npm run build
     startCommand: npm run serve:ssr
-    healthCheckPath: /api/store
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "22.22.3"

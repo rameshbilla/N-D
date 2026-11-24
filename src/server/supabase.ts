@@ -5,6 +5,11 @@ import { config, isSupabaseConfigured } from './config';
 
 export type Db = SupabaseClient;
 
+/** Fail fast instead of hanging the request if Supabase is unreachable or misconfigured. */
+const timedFetch: typeof fetch = (input, init) =>
+  fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(15_000)]) : AbortSignal.timeout(15_000) });
+const sbGlobal = { fetch: timedFetch };
+
 export class NotConfiguredError extends Error {
   constructor(what = 'Supabase') {
     super(`${what} is not configured. Add the required environment variables (see .env.example).`);
@@ -21,6 +26,7 @@ export function userClient(req: Request, res: Response): Db {
   const cached = res.locals['sb'] as Db | undefined;
   if (cached) return cached;
   const client = createServerClient(config.supabaseUrl, config.supabaseAnonKey, {
+    global: sbGlobal,
     cookies: {
       getAll: () => parseCookieHeader(req.headers.cookie ?? '').map((c) => ({ name: c.name, value: c.value ?? '' })),
       setAll: (toSet) => {
@@ -39,7 +45,7 @@ let publicClient: Db | null = null;
 /** Anonymous client — public catalogue reads. Subject to RLS. */
 export function anonClient(): Db {
   if (!isSupabaseConfigured()) throw new NotConfiguredError();
-  return (publicClient ??= createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } }));
+  return (publicClient ??= createClient(config.supabaseUrl, config.supabaseAnonKey, { global: sbGlobal, auth: { persistSession: false, autoRefreshToken: false } }));
 }
 
 let svc: Db | null = null;
@@ -50,5 +56,5 @@ let svc: Db | null = null;
 export function serviceClient(): Db {
   if (!isSupabaseConfigured()) throw new NotConfiguredError();
   if (!config.serviceRoleKey) throw new NotConfiguredError('SUPABASE_SERVICE_ROLE_KEY');
-  return (svc ??= createClient(config.supabaseUrl, config.serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } }));
+  return (svc ??= createClient(config.supabaseUrl, config.serviceRoleKey, { global: sbGlobal, auth: { persistSession: false, autoRefreshToken: false } }));
 }
