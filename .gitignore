@@ -34,3 +34,8 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 !.env.example
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firebase-debug.*.log
