@@ -11,13 +11,21 @@ for (const f of ['.env.local', '.env']) if (existsSync(f)) process.loadEnvFile(f
 const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 // SSRF protection: only render for known hosts (localhost via angular.json, production via SITE_URL / NG_ALLOWED_HOSTS).
-const siteHost = (() => {
+const hostOf = (v: string) => {
   try {
-    return process.env['SITE_URL'] ? [new URL(process.env['SITE_URL']).hostname] : [];
+    return new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`).hostname;
   } catch {
-    return [];
+    return '';
   }
-})();
+};
+const siteHost = [
+  hostOf(process.env['SITE_URL']?.trim() ?? ''),
+  // Set automatically by Render (e.g. nd-powders.onrender.com).
+  process.env['RENDER_EXTERNAL_HOSTNAME'] ?? '',
+  ...(process.env['NG_ALLOWED_HOSTS'] ?? '').split(','),
+]
+  .map((h) => h.trim())
+  .filter(Boolean);
 const angularApp = new AngularNodeAppEngine({ allowedHosts: siteHost });
 
 app.disable('x-powered-by');
