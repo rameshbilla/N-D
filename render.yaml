@@ -1,0 +1,39 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec)
+# Runs the Angular SSR + Express server as one free web service.
+# Secrets (sync: false) are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: nd-powders
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    startCommand: npm run serve:ssr
+    healthCheckPath: /api/store
+    envVars:
+      - key: NODE_VERSION
+        value: "22.22.3"
+      # Set to the service URL Render shows (e.g. https://nd-powders.onrender.com).
+      # Required: SSR only answers requests for this host.
+      - key: SITE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: INITIAL_SUPER_ADMIN_PHONE
+        value: "+919014325025"
+      - key: OTP_RESEND_COOLDOWN_SECONDS
+        value: "45"
+      - key: OTP_MAX_SENDS_PER_HOUR
+        value: "5"
+      - key: OTP_MAX_SENDS_PER_IP_PER_HOUR
+        value: "20"
+      - key: OTP_MAX_VERIFY_ATTEMPTS
+        value: "5"
+      - key: OTP_VERIFY_WINDOW_MINUTES
+        value: "15"
