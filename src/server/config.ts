@@ -45,7 +45,10 @@ export const config = {
   },
 };
 
+// The URL must have a real dotted hostname (catches an API key pasted into SUPABASE_URL by mistake).
 export const isSupabaseConfigured = () =>
-  /^https:\/\/.+/.test(config.supabaseUrl) && !config.supabaseUrl.includes('YOUR-PROJECT') && config.supabaseAnonKey.length > 20;
+  /^https:\/\/[^/\s]+\.[^/\s]+/.test(config.supabaseUrl) &&
+  !config.supabaseUrl.includes('YOUR-PROJECT') &&
+  config.supabaseAnonKey.length > 20;
 export const isServiceRoleConfigured = () => config.serviceRoleKey.length > 20;
 export const isRazorpayConfigured = () => Boolean(config.razorpay.keyId && config.razorpay.keySecret);
